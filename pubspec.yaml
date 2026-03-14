@@ -1,0 +1,26 @@
+name: geo_photo_app
+description: A Flutter UI project for capturing geo-tagged photos.
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.12.0
+  camera_windows: ^0.2.6+4
+  geolocator: ^14.0.2
+  http: ^1.5.0
+  path: ^1.9.0
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
