@@ -22,16 +22,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
   late final LocalGalleryService _galleryService;
   late final NominatimService _nominatimService;
   late final TextEditingController _noteController;
-  late final TextEditingController _customCategoryController;
-  final List<String> _categories = [
-    'Medicine',
-    'Grocery',
-    'Books',
-    'Electronics',
-    'Street',
-    'Custom',
-  ];
-  String _selectedCategory = 'Medicine';
   bool _isUploading = false;
   bool _isResolvingLocation = false;
   bool _hasLoadedArgs = false;
@@ -45,7 +35,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
     _galleryService = LocalGalleryService();
     _nominatimService = NominatimService();
     _noteController = TextEditingController();
-    _customCategoryController = TextEditingController();
   }
 
   @override
@@ -65,7 +54,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
     _apiService.dispose();
     _nominatimService.dispose();
     _noteController.dispose();
-    _customCategoryController.dispose();
     super.dispose();
   }
 
@@ -104,12 +92,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
       return;
     }
 
-    final category = _currentCategory();
-    if (category.isEmpty) {
-      _showMessage('Please enter or select a category.');
-      return;
-    }
-
     final note = _noteController.text.trim();
     final locationName = _locationName?.trim();
 
@@ -122,7 +104,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
         sourcePath: args.imagePath,
         latitude: args.latitude!,
         longitude: args.longitude!,
-        category: category,
         locationName: locationName?.isNotEmpty == true ? locationName : null,
         note: note.isNotEmpty ? note : null,
       );
@@ -141,9 +122,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
       args.imagePath,
       args.latitude!,
       args.longitude!,
-      category,
-      locationName: locationName?.isNotEmpty == true ? locationName : null,
-      note: note.isNotEmpty ? note : null,
+      locationName?.isNotEmpty == true ? locationName : null,
+      note.isNotEmpty ? note : null,
     );
 
     if (!mounted) {
@@ -175,13 +155,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  String _currentCategory() {
-    if (_selectedCategory == 'Custom') {
-      return _customCategoryController.text.trim();
-    }
-    return _selectedCategory;
   }
 
   String _locationLabel(PreviewScreenArgs? args) {
@@ -464,56 +437,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           label: 'Location name',
                           value: _locationLabel(args),
                           icon: Icons.place_rounded,
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28),
-                            color: Colors.white.withValues(alpha: 0.03),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.06),
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              DropdownButtonFormField<String>(
-                                value: _selectedCategory,
-                                decoration: const InputDecoration(
-                                  labelText: 'Category',
-                                  border: OutlineInputBorder(),
-                                ),
-                                items: _categories
-                                    .map(
-                                      (category) => DropdownMenuItem<String>(
-                                        value: category,
-                                        child: Text(category),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: _isUploading
-                                    ? null
-                                    : (value) {
-                                        if (value == null) {
-                                          return;
-                                        }
-                                        setState(() {
-                                          _selectedCategory = value;
-                                        });
-                                      },
-                              ),
-                              if (_selectedCategory == 'Custom') ...[
-                                const SizedBox(height: 12),
-                                TextField(
-                                  controller: _customCategoryController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Custom category',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
                         ),
                         const SizedBox(height: 16),
                         Container(

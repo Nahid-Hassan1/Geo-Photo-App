@@ -66,9 +66,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 final entry = entries[index];
                 return PhotoCard(
                   title: entry.title,
-                  subtitle: entry.category,
+                  subtitle: entry.subtitle,
                   imagePath: entry.imagePath,
-                  overlayText: entry.subtitle,
+                  overlayText: entry.locationName?.trim().isNotEmpty == true
+                      ? entry.locationName
+                      : entry.coordinatesLabel,
                   onTap: () {
                     Navigator.of(context).pushNamed(
                       PhotoDetailScreen.routeName,
