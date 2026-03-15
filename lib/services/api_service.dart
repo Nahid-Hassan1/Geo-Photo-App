@@ -20,15 +20,17 @@ class ApiService {
     String imagePath,
     double latitude,
     double longitude,
+    String category, {
     String? locationName,
     String? note,
-  ) async {
+  }) async {
     final uri = Uri.parse(baseUrl);
 
     try {
       final request = http.MultipartRequest('POST', uri)
         ..fields['latitude'] = latitude.toString()
-        ..fields['longitude'] = longitude.toString();
+        ..fields['longitude'] = longitude.toString()
+        ..fields['category'] = category;
 
       if (locationName != null && locationName.trim().isNotEmpty) {
         request.fields['location_name'] = locationName.trim();

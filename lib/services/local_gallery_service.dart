@@ -29,6 +29,7 @@ class LocalGalleryService {
     required String sourcePath,
     required double latitude,
     required double longitude,
+    required String category,
     String? locationName,
     String? note,
   }) async {
@@ -51,9 +52,10 @@ class LocalGalleryService {
       imagePath: savedFile.path,
       latitude: latitude,
       longitude: longitude,
+      createdAt: DateTime.now(),
+      category: category,
       locationName: locationName,
       note: note,
-      createdAt: DateTime.now(),
     );
 
     final entries = await fetchEntries();

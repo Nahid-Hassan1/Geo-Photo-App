@@ -50,15 +50,20 @@ class PhotoDetailScreen extends StatelessWidget {
                         .titleMedium
                         ?.copyWith(fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Category: ${entry.category}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                   if (entry.locationName != null &&
                       entry.locationName!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
                     Text(
                       'Location: ${entry.locationName}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 6),
                   ],
+                  const SizedBox(height: 6),
                   Text(
                     'Latitude: ${entry.latitude.toStringAsFixed(6)}',
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -68,14 +73,14 @@ class PhotoDetailScreen extends StatelessWidget {
                     'Longitude: ${entry.longitude.toStringAsFixed(6)}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 6),
                   if (entry.note != null && entry.note!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 6),
                     Text(
                       'Note: ${entry.note}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    const SizedBox(height: 6),
                   ],
+                  const SizedBox(height: 6),
                   Text(
                     'Captured: ${entry.createdAt}',
                     style: Theme.of(context).textTheme.bodySmall,

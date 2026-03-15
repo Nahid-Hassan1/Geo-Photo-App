@@ -13,6 +13,20 @@ class PhotoEntrySerializer(serializers.ModelSerializer):
             'longitude',
             'location_name',
             'note',
+            'category',
+            'extracted_text',
+            'extracted_data',
+            'processing_status',
+            'processing_error',
+            'processed_at',
             'created_at',
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = [
+            'id',
+            'extracted_text',
+            'extracted_data',
+            'processing_status',
+            'processing_error',
+            'processed_at',
+            'created_at',
+        ]
