@@ -20,16 +20,27 @@ class ApiService {
     String imagePath,
     double latitude,
     double longitude,
+    String? locationName,
+    String? note,
   ) async {
     final uri = Uri.parse(baseUrl);
 
     try {
       final request = http.MultipartRequest('POST', uri)
         ..fields['latitude'] = latitude.toString()
-        ..fields['longitude'] = longitude.toString()
-        ..files.add(
-          await http.MultipartFile.fromPath('image', imagePath),
-        );
+        ..fields['longitude'] = longitude.toString();
+
+      if (locationName != null && locationName.trim().isNotEmpty) {
+        request.fields['location_name'] = locationName.trim();
+      }
+
+      if (note != null && note.trim().isNotEmpty) {
+        request.fields['note'] = note.trim();
+      }
+
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imagePath),
+      );
 
       final streamedResponse = await _client.send(request);
       final response = await http.Response.fromStream(streamedResponse);

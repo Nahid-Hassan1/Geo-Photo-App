@@ -6,6 +6,8 @@ class PhotoEntry(models.Model):
     image = models.ImageField(upload_to='photos/')
     latitude = models.FloatField()
     longitude = models.FloatField()
+    location_name = models.CharField(max_length=255, blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:

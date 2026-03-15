@@ -68,7 +68,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   title: entry.title,
                   subtitle: entry.subtitle,
                   imagePath: entry.imagePath,
-                  overlayText: entry.subtitle,
+                  overlayText: entry.locationName?.trim().isNotEmpty == true
+                      ? entry.locationName
+                      : entry.coordinatesLabel,
                   onTap: () {
                     Navigator.of(context).pushNamed(
                       PhotoDetailScreen.routeName,

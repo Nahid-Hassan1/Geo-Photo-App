@@ -14,3 +14,12 @@ pubspec.lock
 
 # Misc
 coverage/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+backend/media/
+media/
+backend/db.sqlite3

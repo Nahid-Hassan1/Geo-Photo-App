@@ -29,6 +29,8 @@ class LocalGalleryService {
     required String sourcePath,
     required double latitude,
     required double longitude,
+    String? locationName,
+    String? note,
   }) async {
     final documents = await getApplicationDocumentsDirectory();
     final photosDir = Directory(path.join(documents.path, 'photos'));
@@ -49,6 +51,8 @@ class LocalGalleryService {
       imagePath: savedFile.path,
       latitude: latitude,
       longitude: longitude,
+      locationName: locationName,
+      note: note,
       createdAt: DateTime.now(),
     );
 

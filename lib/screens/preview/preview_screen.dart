@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/colors.dart';
 import '../../services/api_service.dart';
 import '../../services/local_gallery_service.dart';
+import '../../services/nominatim_service.dart';
 import '../../widgets/primary_button.dart';
 
 class PreviewScreen extends StatefulWidget {
@@ -19,19 +20,65 @@ class PreviewScreen extends StatefulWidget {
 class _PreviewScreenState extends State<PreviewScreen> {
   late final ApiService _apiService;
   late final LocalGalleryService _galleryService;
+  late final NominatimService _nominatimService;
+  late final TextEditingController _noteController;
   bool _isUploading = false;
+  bool _isResolvingLocation = false;
+  bool _hasLoadedArgs = false;
+  String? _locationName;
+  PreviewScreenArgs? _args;
 
   @override
   void initState() {
     super.initState();
     _apiService = ApiService(baseUrl: ApiService.defaultUploadUrl);
     _galleryService = LocalGalleryService();
+    _nominatimService = NominatimService();
+    _noteController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasLoadedArgs) {
+      return;
+    }
+
+    _hasLoadedArgs = true;
+    _args = ModalRoute.of(context)?.settings.arguments as PreviewScreenArgs?;
+    _resolveLocationName(_args);
   }
 
   @override
   void dispose() {
     _apiService.dispose();
+    _nominatimService.dispose();
+    _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _resolveLocationName(PreviewScreenArgs? args) async {
+    if (args == null || !args.hasCoordinates) {
+      return;
+    }
+
+    setState(() {
+      _isResolvingLocation = true;
+    });
+
+    final name = await _nominatimService.reverseGeocode(
+      latitude: args.latitude!,
+      longitude: args.longitude!,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _locationName = name;
+      _isResolvingLocation = false;
+    });
   }
 
   Future<void> _savePhoto(PreviewScreenArgs? args) async {
@@ -45,6 +92,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
       return;
     }
 
+    final note = _noteController.text.trim();
+    final locationName = _locationName?.trim();
+
     setState(() {
       _isUploading = true;
     });
@@ -54,6 +104,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
         sourcePath: args.imagePath,
         latitude: args.latitude!,
         longitude: args.longitude!,
+        locationName: locationName?.isNotEmpty == true ? locationName : null,
+        note: note.isNotEmpty ? note : null,
       );
     } catch (error) {
       if (!mounted) {
@@ -70,6 +122,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
       args.imagePath,
       args.latitude!,
       args.longitude!,
+      locationName?.isNotEmpty == true ? locationName : null,
+      note.isNotEmpty ? note : null,
     );
 
     if (!mounted) {
@@ -103,10 +157,27 @@ class _PreviewScreenState extends State<PreviewScreen> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
+  String _locationLabel(PreviewScreenArgs? args) {
+    if (args == null || !args.hasCoordinates) {
+      return '--';
+    }
+
+    if (_isResolvingLocation) {
+      return 'Resolving location...';
+    }
+
+    final name = _locationName?.trim();
+    if (name != null && name.isNotEmpty) {
+      return name;
+    }
+
+    return 'Location name unavailable';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)?.settings.arguments as PreviewScreenArgs?;
+    final args = _args ??
+        (ModalRoute.of(context)?.settings.arguments as PreviewScreenArgs?);
 
     return Scaffold(
       body: Stack(
@@ -360,6 +431,33 @@ class _PreviewScreenState extends State<PreviewScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 20),
+                        _InfoCard(
+                          label: 'Location name',
+                          value: _locationLabel(args),
+                          icon: Icons.place_rounded,
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28),
+                            color: Colors.white.withValues(alpha: 0.03),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.06),
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _noteController,
+                            maxLines: 3,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            decoration: const InputDecoration(
+                              labelText: 'Add a note (optional)',
+                              border: OutlineInputBorder(),
+                              alignLabelWithHint: true,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 20),
                         Container(
@@ -616,6 +714,53 @@ class _CoordinateCard extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontSize: 26,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.primaryAccent),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
           ),
         ],
